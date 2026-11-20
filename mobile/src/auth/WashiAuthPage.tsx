@@ -19,18 +19,19 @@ import { WashiWordmark } from '../board/WashiWordmark';
 
 type Props = {
   title: string;
-  colour: 'yellow' | 'pink';
+  colour: keyof typeof noteColours;
+  belowHeader?: boolean;
   error: string;
   notice?: string;
   actions: ReactNode;
 };
 
-export function WashiAuthPage({ title, colour, error, notice, children, actions }: PropsWithChildren<Props>) {
+export function WashiAuthPage({ title, colour, belowHeader = false, error, notice, children, actions }: PropsWithChildren<Props>) {
   const [fontLoaded] = useFonts({ Caveat_400Regular });
   const palette = noteColours[colour];
 
   return (
-    <SafeAreaView style={styles.page}>
+    <SafeAreaView style={styles.page} edges={belowHeader ? ['left', 'right', 'bottom'] : undefined}>
       <PaperGrid />
       <KeyboardAvoidingView
         style={styles.frame}
@@ -45,7 +46,12 @@ export function WashiAuthPage({ title, colour, error, notice, children, actions 
                 {title}
               </Text>
               {notice && !error ? (
-                <Text accessibilityRole="alert" style={styles.notice}>{notice}</Text>
+                <Text
+                  accessibilityRole="alert"
+                  style={[styles.notice, colour === 'green' && styles.noticeOnGreen]}
+                >
+                  {notice}
+                </Text>
               ) : null}
               <View style={styles.fields}>{children}</View>
               {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
@@ -107,6 +113,7 @@ const styles = StyleSheet.create({
   fields: { gap: 12 },
   actions: { gap: 8, marginTop: 4 },
   notice: { color: paper.ink, backgroundColor: noteColours.green.paper, padding: 10, borderRadius: 8 },
+  noticeOnGreen: { backgroundColor: noteColours.green.tag },
   error: { color: '#8c2426', fontWeight: '600' },
   button: {
     minHeight: 46,

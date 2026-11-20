@@ -57,7 +57,17 @@ export function AppNavigator() {
                 title: route.params.mode === 'edit' ? 'Edit note' : 'New note',
               })}
             />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen
+              name="Profile"
+              component={ProfileScreen}
+              options={{
+                title: '',
+                headerBackButtonDisplayMode: 'minimal',
+                headerStyle: { backgroundColor: paper.background },
+                headerTintColor: paper.ink,
+                headerShadowVisible: false,
+              }}
+            />
           </>
         ) : (
           <>

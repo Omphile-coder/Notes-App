@@ -1,8 +1,5 @@
-import { useRef, useState, type PropsWithChildren } from 'react';
+import { useRef, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -35,22 +32,6 @@ export function useAuthAction() {
   return { busy, error, run };
 }
 
-export function AuthForm({ children, error }: PropsWithChildren<{ error: string }>) {
-  return (
-    <KeyboardAvoidingView
-      style={styles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        {children}
-        {error ? (
-          <Text accessibilityRole="alert" style={styles.error}>{error}</Text>
-        ) : null}
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
-}
-
 export function AuthField({
   label,
   ...props
@@ -74,8 +55,6 @@ export function EmailField(props: TextInputProps) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
-  content: { padding: 20, gap: 14 },
   field: { gap: 6 },
   label: { fontWeight: '600', color: '#27241f' },
   input: {
@@ -87,5 +66,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     minHeight: 46,
   },
-  error: { color: '#9f2527' },
 });

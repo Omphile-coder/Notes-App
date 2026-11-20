@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Button, Text } from 'react-native';
 
-import { AuthField, AuthForm, EmailField, useAuthAction } from '../auth/AuthForm';
+import { AuthField, EmailField, useAuthAction } from '../auth/AuthForm';
 import { useAuth } from '../auth/AuthProvider';
 import type { Account } from '../auth/accounts';
+import { WashiAuthButton, WashiAuthPage } from '../auth/WashiAuthPage';
 
 export function ProfileScreen() {
   const { session } = useAuth();
@@ -31,7 +31,29 @@ function ProfileForm({ account }: { account: Account }) {
   }
 
   return (
-    <AuthForm error={error}>
+    <WashiAuthPage
+      title="Profile"
+      colour="green"
+      belowHeader
+      error={error}
+      notice={saved ? 'Profile saved.' : undefined}
+      actions={(
+        <>
+          <WashiAuthButton
+            title="Save profile"
+            disabled={busy || !currentPassword}
+            busy={busy}
+            onPress={() => void run(save, 'Unable to save your profile. Try again.')}
+          />
+          <WashiAuthButton
+            title="Sign out"
+            secondary
+            disabled={busy}
+            onPress={() => void run(signOut, 'Unable to sign out. Try again.')}
+          />
+        </>
+      )}
+    >
       <AuthField
         label="Username"
         value={username}
@@ -60,17 +82,6 @@ function ProfileForm({ account }: { account: Account }) {
         autoComplete="new-password"
         secureTextEntry
       />
-      <Button
-        title="Save profile"
-        disabled={busy || !currentPassword}
-        onPress={() => void run(save, 'Unable to save your profile. Try again.')}
-      />
-      <Button
-        title="Sign out"
-        disabled={busy}
-        onPress={() => void run(signOut, 'Unable to sign out. Try again.')}
-      />
-      {saved && !error ? <Text accessibilityRole="alert">Profile saved.</Text> : null}
-    </AuthForm>
+    </WashiAuthPage>
   );
 }
