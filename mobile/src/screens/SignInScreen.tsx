@@ -48,6 +48,7 @@ export function SignInScreen({ navigation, route }: ScreenProps<'SignIn'>) {
       <EmailField value={email} onChangeText={setEmail} editable={!busy} />
       <AuthField
         label="Password"
+        placeholder="Enter your password"
         value={password}
         onChangeText={setPassword}
         editable={!busy}

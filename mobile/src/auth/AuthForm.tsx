@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 
+import { paper } from '../board/theme';
 import { AuthError } from './accounts';
 
 export function useAuthAction() {
@@ -42,6 +43,7 @@ export function AuthField({
       <TextInput
         autoCapitalize="none"
         autoCorrect={false}
+        placeholderTextColor={paper.muted}
         {...props}
         accessibilityLabel={label}
         style={styles.input}
@@ -51,7 +53,15 @@ export function AuthField({
 }
 
 export function EmailField(props: TextInputProps) {
-  return <AuthField {...props} label="Email" autoComplete="email" keyboardType="email-address" />;
+  return (
+    <AuthField
+      placeholder="name@example.com"
+      {...props}
+      label="Email"
+      autoComplete="email"
+      keyboardType="email-address"
+    />
+  );
 }
 
 const styles = StyleSheet.create({

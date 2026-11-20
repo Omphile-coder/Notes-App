@@ -52,6 +52,7 @@ export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
       <EmailField value={email} onChangeText={setEmail} editable={!busy} />
       <AuthField
         label="Password"
+        placeholder="Create a password"
         value={password}
         onChangeText={setPassword}
         editable={!busy}
@@ -60,6 +61,7 @@ export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
       />
       <AuthField
         label="Confirm password"
+        placeholder="Re-enter your password"
         value={confirmation}
         onChangeText={setConfirmation}
         editable={!busy}
