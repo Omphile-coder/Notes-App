@@ -6,7 +6,7 @@ Built by Omphile Lucas for CodeTribe's React Native Task 2.
 
 ## Preview
 
-<img src="./mobile/assets/notes-iphone.jpg"/>
+<img src="./mobile/assets/notes-iphone.jpeg"/>
 
 ## Features
 
