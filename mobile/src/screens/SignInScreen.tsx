@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { AuthField, EmailField, useAuthAction } from '../auth/AuthForm';
-import { useAuth } from '../auth/AuthProvider';
-import { WashiAuthButton, WashiAuthPage } from '../auth/WashiAuthPage';
-import type { ScreenProps } from '../navigation/types';
+import { AuthField, EmailField, useAuthAction } from "../auth/AuthForm";
+import { useAuth } from "../auth/AuthProvider";
+import { WashiAuthButton, WashiAuthPage } from "../auth/WashiAuthPage";
+import type { ScreenProps } from "../navigation/types";
 
-export function SignInScreen({ navigation, route }: ScreenProps<'SignIn'>) {
+export function SignInScreen({ navigation, route }: ScreenProps<"SignIn">) {
   const { signIn } = useAuth();
   const { busy, error, run } = useAuthAction();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const registeredEmail = route.params?.registeredEmail;
 
   useEffect(() => {
     if (registeredEmail) {
       setEmail(registeredEmail);
-      setPassword('');
+      setPassword("");
     }
   }, [registeredEmail]);
 
@@ -24,26 +24,33 @@ export function SignInScreen({ navigation, route }: ScreenProps<'SignIn'>) {
       title="Sign in"
       colour="yellow"
       error={error}
-      notice={registeredEmail ? 'Account created. Sign in to continue.' : undefined}
-      actions={(
+      notice={
+        registeredEmail ? "Account created. Sign in to continue." : undefined
+      }
+      actions={
         <>
           <WashiAuthButton
-            title={busy ? 'Signing in…' : 'Sign in'}
+            title={busy ? "Signing in…" : "Sign in"}
             disabled={busy || !email.trim() || !password}
             busy={busy}
-            onPress={() => void run(() => signIn(email, password), 'Unable to sign in. Try again.')}
+            onPress={() =>
+              void run(
+                () => signIn(email, password),
+                "Unable to sign in. Try again.",
+              )
+            }
           />
           <WashiAuthButton
             title="Create an account"
             secondary
             disabled={busy}
             onPress={() => {
-              setPassword('');
-              navigation.navigate('Register');
+              setPassword("");
+              navigation.navigate("Register");
             }}
           />
         </>
-      )}
+      }
     >
       <EmailField value={email} onChangeText={setEmail} editable={!busy} />
       <AuthField
