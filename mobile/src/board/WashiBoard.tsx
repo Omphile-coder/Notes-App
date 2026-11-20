@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { noteCategories, type NoteCategory } from '../notes/categories';
-import { matchesNoteSearch, type Note } from '../notes/notes';
+import { matchesNoteSearch, type Note, type NoteSortOrder } from '../notes/notes';
 import { useSavedNotes } from '../notes/useSavedNotes';
 import { NoteCard } from './NoteCard';
 import { PaperGrid } from './PaperGrid';
@@ -35,6 +35,10 @@ type Props = {
 } & ({ header: HeaderActions; category?: never } | { category: NoteCategory; header?: never });
 
 const layouts: Layout[] = ['Board', 'List'];
+const sortingOptions: { value: NoteSortOrder; label: string }[] = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
+];
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   weekday: 'long',
   month: 'long',
@@ -45,10 +49,11 @@ export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
   const [fontLoaded] = useFonts({ Caveat_400Regular, InstrumentSerif_400Regular });
   const [layout, setLayout] = useState<Layout>('Board');
   const [query, setQuery] = useState('');
+  const [order, setOrder] = useState<NoteSortOrder>('newest');
   const { width, fontScale } = useWindowDimensions();
   const inColumns = layout === 'Board' && width >= 350 && fontScale <= 1.3;
 
-  const { state, retry } = useSavedNotes(category);
+  const { state, retry } = useSavedNotes(order, category);
   const filtered = state.status === 'ready'
     ? state.notes.filter((note) => matchesNoteSearch(note, query))
     : [];
@@ -145,6 +150,26 @@ export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
               ))}
             </ScrollView>
           ) : null}
+
+          <View style={styles.sortRow}>
+            <Text style={styles.filterLabel}>Date added</Text>
+            <View accessibilityRole="radiogroup" accessibilityLabel="Sort by date added" style={styles.sortOptions}>
+              {sortingOptions.map(({ value, label }) => {
+                const selected = order === value;
+                return (
+                  <Pressable
+                    key={value}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: selected }}
+                    onPress={() => setOrder(value)}
+                    style={[styles.filter, selected && styles.activeFilter]}
+                  >
+                    <Text style={selected ? styles.activeFilterLabel : styles.filterLabel}>{label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
 
           {state.status === 'loading' ? (
             <ActivityIndicator accessibilityLabel="Loading notes" color={paper.muted} />
@@ -281,6 +306,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: paper.white,
   },
+  sortRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
+  sortOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, flexShrink: 1 },
   activeFilter: { backgroundColor: paper.ink, borderColor: paper.ink },
   filterLabel: { color: paper.muted, fontSize: 13, fontWeight: '700' },
   activeFilterLabel: { color: paper.white, fontSize: 13, fontWeight: '700' },
