@@ -18,6 +18,8 @@ export type Note = {
   updatedAt: number | null;
 };
 
+export type NoteSortOrder = 'newest' | 'oldest';
+
 export class NoteError extends Error {}
 
 function validateNote(draft: NoteDraft) {
@@ -30,19 +32,22 @@ function validateNote(draft: NoteDraft) {
   return { title: draft.title.trim(), body, category: draft.category };
 }
 
-export async function listNotes(ownerId: string, category?: NoteCategory) {
+export async function listNotes(
+  ownerId: string,
+  category?: NoteCategory,
+  order: NoteSortOrder = 'newest',
+) {
   const database = await getDatabase();
-  const columns = 'id, title, body, category, createdAt, updatedAt';
-  return category
-    ? database.getAllAsync<Note>(
-        `SELECT ${columns} FROM notes WHERE ownerId = ? AND category = ? ORDER BY createdAt DESC, rowid DESC`,
-        ownerId,
-        category,
-      )
-    : database.getAllAsync<Note>(
-        `SELECT ${columns} FROM notes WHERE ownerId = ? ORDER BY createdAt DESC, rowid DESC`,
-        ownerId,
-      );
+  const direction = order === 'oldest' ? 'ASC' : 'DESC';
+  const categoryFilter = category ? ' AND category = ?' : '';
+  const parameters = category ? [ownerId, category] : [ownerId];
+
+  return database.getAllAsync<Note>(
+    `SELECT id, title, body, category, createdAt, updatedAt
+     FROM notes WHERE ownerId = ?${categoryFilter}
+     ORDER BY createdAt ${direction}, rowid ${direction}`,
+    ...parameters,
+  );
 }
 
 export async function getNote(ownerId: string, id: string) {
@@ -96,6 +101,6 @@ export async function deleteNote(ownerId: string, id: string) {
 }
 
 export function matchesNoteSearch(note: Note, query: string) {
-  const text = [note.title, note.body, note.category].join(' ').toLowerCase();
+  const text = `${note.title} ${note.body}`.toLowerCase();
   return query.trim().toLowerCase().split(/\s+/).every((word) => text.includes(word));
 }

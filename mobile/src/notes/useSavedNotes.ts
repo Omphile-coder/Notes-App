@@ -3,14 +3,14 @@ import { useCallback, useState } from 'react';
 
 import { useAuth } from '../auth/AuthProvider';
 import type { NoteCategory } from './categories';
-import { listNotes, type Note } from './notes';
+import { listNotes, type Note, type NoteSortOrder } from './notes';
 
 type NotesState =
   | { status: 'loading' }
   | { status: 'error' }
   | { status: 'ready'; notes: Note[] };
 
-export function useSavedNotes(category?: NoteCategory) {
+export function useSavedNotes(order: NoteSortOrder, category?: NoteCategory) {
   const { session } = useAuth();
   const ownerId = session.status === 'ready' ? session.user?.id : undefined;
   const [state, setState] = useState<NotesState>({ status: 'loading' });
@@ -21,7 +21,7 @@ export function useSavedNotes(category?: NoteCategory) {
 
     let active = true;
     setState({ status: 'loading' });
-    void listNotes(ownerId, category).then(
+    void listNotes(ownerId, category, order).then(
       (notes) => {
         if (active) setState({ status: 'ready', notes });
       },
@@ -33,7 +33,7 @@ export function useSavedNotes(category?: NoteCategory) {
     return () => {
       active = false;
     };
-  }, [ownerId, category, attempt]));
+  }, [ownerId, category, order, attempt]));
 
   return {
     state,
