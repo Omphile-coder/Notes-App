@@ -1,7 +1,7 @@
-import { randomUUID } from 'expo-crypto';
+import { randomUUID } from "expo-crypto";
 
-import { getDatabase } from '../storage/database';
-import { noteCategories, type NoteCategory } from './categories';
+import { getDatabase } from "../storage/database";
+import { noteCategories, type NoteCategory } from "./categories";
 
 export type NoteDraft = {
   title: string;
@@ -19,15 +19,15 @@ export type Note = {
   pinned: 0 | 1;
 };
 
-export type NoteSortOrder = 'newest' | 'oldest';
+export type NoteSortOrder = "newest" | "oldest";
 
 export class NoteError extends Error {}
 
 function validateNote(draft: NoteDraft) {
   const body = draft.body.trim();
-  if (!body) throw new NoteError('Write your note before saving.');
+  if (!body) throw new NoteError("Write your note before saving.");
   if (!draft.category || !noteCategories.includes(draft.category)) {
-    throw new NoteError('Choose a category before saving.');
+    throw new NoteError("Choose a category before saving.");
   }
 
   return { title: draft.title.trim(), body, category: draft.category };
@@ -36,11 +36,11 @@ function validateNote(draft: NoteDraft) {
 export async function listNotes(
   ownerId: string,
   category?: NoteCategory,
-  order: NoteSortOrder = 'newest',
+  order: NoteSortOrder = "newest",
 ) {
   const database = await getDatabase();
-  const direction = order === 'oldest' ? 'ASC' : 'DESC';
-  const categoryFilter = category ? ' AND category = ?' : '';
+  const direction = order === "oldest" ? "ASC" : "DESC";
+  const categoryFilter = category ? " AND category = ?" : "";
   const parameters = category ? [ownerId, category] : [ownerId];
 
   return database.getAllAsync<Note>(
@@ -68,7 +68,7 @@ export async function createNote(ownerId: string, draft: NoteDraft) {
   const database = await getDatabase();
   const id = randomUUID();
   await database.runAsync(
-    'INSERT INTO notes (id, ownerId, title, body, category, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
+    "INSERT INTO notes (id, ownerId, title, body, category, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
     id,
     ownerId,
     title,
@@ -79,11 +79,15 @@ export async function createNote(ownerId: string, draft: NoteDraft) {
   return id;
 }
 
-export async function updateNote(ownerId: string, id: string, draft: NoteDraft) {
+export async function updateNote(
+  ownerId: string,
+  id: string,
+  draft: NoteDraft,
+) {
   const { title, body, category } = validateNote(draft);
   const database = await getDatabase();
   const result = await database.runAsync(
-    'UPDATE notes SET title = ?, body = ?, category = ?, updatedAt = ? WHERE ownerId = ? AND id = ?',
+    "UPDATE notes SET title = ?, body = ?, category = ?, updatedAt = ? WHERE ownerId = ? AND id = ?",
     title,
     body,
     category,
@@ -91,10 +95,15 @@ export async function updateNote(ownerId: string, id: string, draft: NoteDraft) 
     ownerId,
     id,
   );
-  if (result.changes === 0) throw new NoteError('This note is no longer available.');
+  if (result.changes === 0)
+    throw new NoteError("This note is no longer available.");
 }
 
-export async function setNotePinned(ownerId: string, id: string, pinned: boolean) {
+export async function setNotePinned(
+  ownerId: string,
+  id: string,
+  pinned: boolean,
+) {
   const database = await getDatabase();
   if (pinned) {
     await database.runAsync(
@@ -108,7 +117,7 @@ export async function setNotePinned(ownerId: string, id: string, pinned: boolean
   }
 
   await database.runAsync(
-    'DELETE FROM note_pins WHERE noteId IN (SELECT id FROM notes WHERE ownerId = ? AND id = ?)',
+    "DELETE FROM note_pins WHERE noteId IN (SELECT id FROM notes WHERE ownerId = ? AND id = ?)",
     ownerId,
     id,
   );
@@ -117,14 +126,19 @@ export async function setNotePinned(ownerId: string, id: string, pinned: boolean
 export async function deleteNote(ownerId: string, id: string) {
   const database = await getDatabase();
   const result = await database.runAsync(
-    'DELETE FROM notes WHERE ownerId = ? AND id = ?',
+    "DELETE FROM notes WHERE ownerId = ? AND id = ?",
     ownerId,
     id,
   );
-  if (result.changes === 0) throw new NoteError('This note is no longer available.');
+  if (result.changes === 0)
+    throw new NoteError("This note is no longer available.");
 }
 
 export function matchesNoteSearch(note: Note, query: string) {
   const text = `${note.title} ${note.body}`.toLowerCase();
-  return query.trim().toLowerCase().split(/\s+/).every((word) => text.includes(word));
+  return query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .every((word) => text.includes(word));
 }
