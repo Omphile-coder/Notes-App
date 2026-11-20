@@ -1,25 +1,22 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { AuthField, EmailField, useAuthAction } from "../auth/AuthForm";
-import { AuthError, createAccount } from "../auth/accounts";
-import { WashiAuthButton, WashiAuthPage } from "../auth/WashiAuthPage";
-import type { ScreenProps } from "../navigation/types";
+import { AuthField, EmailField, useAuthAction } from '../auth/AuthForm';
+import { AuthError, createAccount } from '../auth/accounts';
+import { WashiAuthButton, WashiAuthPage } from '../auth/WashiAuthPage';
+import type { ScreenProps } from '../navigation/types';
 
-export function RegisterScreen({ navigation }: ScreenProps<"Register">) {
+export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
   const { busy, error, run } = useAuthAction();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmation, setConfirmation] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmation, setConfirmation] = useState('');
 
   async function register() {
-    if (password !== confirmation)
-      throw new AuthError("The passwords do not match.");
+    if (password !== confirmation) throw new AuthError('The passwords do not match.');
     await createAccount({ username, email, password });
     if (navigation.isFocused()) {
-      navigation.popTo("SignIn", {
-        registeredEmail: email.trim().toLowerCase(),
-      });
+      navigation.popTo('SignIn', { registeredEmail: email.trim().toLowerCase() });
     }
   }
 
@@ -28,15 +25,13 @@ export function RegisterScreen({ navigation }: ScreenProps<"Register">) {
       title="Create an account"
       colour="pink"
       error={error}
-      actions={
+      actions={(
         <>
           <WashiAuthButton
-            title={busy ? "Creating account…" : "Create account"}
+            title={busy ? 'Creating account…' : 'Create account'}
             disabled={busy}
             busy={busy}
-            onPress={() =>
-              void run(register, "Unable to create an account. Try again.")
-            }
+            onPress={() => void run(register, 'Unable to create an account. Try again.')}
           />
           <WashiAuthButton
             title="Back to sign in"
@@ -45,10 +40,11 @@ export function RegisterScreen({ navigation }: ScreenProps<"Register">) {
             onPress={() => navigation.goBack()}
           />
         </>
-      }
+      )}
     >
       <AuthField
         label="Username"
+        placeholder="Enter your username"
         value={username}
         onChangeText={setUsername}
         editable={!busy}
