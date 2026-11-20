@@ -1,22 +1,13 @@
-import { Button, StyleSheet, View } from 'react-native';
-
+import { WashiBoard } from '../board/WashiBoard';
 import type { ScreenProps } from '../navigation/types';
 
 export function CategoryScreen({ navigation, route }: ScreenProps<'Category'>) {
   const { category } = route.params;
 
   return (
-    <View style={styles.content}>
-      <Button
-        title={`New ${category.toLowerCase()} note`}
-        onPress={() => navigation.navigate('NoteEditor', { mode: 'create', category })}
-      />
-    </View>
+    <WashiBoard
+      category={category}
+      onNewNote={() => navigation.navigate('NoteEditor', { mode: 'create', category })}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    padding: 20,
-  },
-});

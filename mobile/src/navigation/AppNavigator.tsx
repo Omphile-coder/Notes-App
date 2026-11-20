@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, Button, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '../auth/AuthProvider';
+import { paper } from '../board/theme';
 import { BoardScreen } from '../screens/BoardScreen';
 import { CategoryScreen } from '../screens/CategoryScreen';
 import { NoteEditorScreen } from '../screens/NoteEditorScreen';
@@ -38,11 +39,16 @@ export function AppNavigator() {
       <Stack.Navigator>
         {session.user ? (
           <>
-            <Stack.Screen name="Board" component={BoardScreen} />
+            <Stack.Screen name="Board" component={BoardScreen} options={{ headerShown: false }} />
             <Stack.Screen
               name="Category"
               component={CategoryScreen}
-              options={({ route }) => ({ title: route.params.category })}
+              options={({ route }) => ({
+                title: route.params.category,
+                headerStyle: { backgroundColor: paper.background },
+                headerTintColor: paper.ink,
+                headerShadowVisible: false,
+              })}
             />
             <Stack.Screen
               name="NoteEditor"
