@@ -34,6 +34,7 @@ export function NoteCard({
   const pinned = note.pinned === 1;
 
   return (
+    
     <View
       style={[
         styles.card,
