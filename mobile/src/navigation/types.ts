@@ -3,7 +3,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { NoteCategory } from '../notes/categories';
 
 export type RootStackParamList = {
-  SignIn: undefined;
+  SignIn: { registeredEmail: string } | undefined;
   Register: undefined;
   Board: undefined;
   Category: { category: NoteCategory };
