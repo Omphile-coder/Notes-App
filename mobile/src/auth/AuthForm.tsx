@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 
 import { paper } from '../board/theme';
+
 import { AuthError } from './accounts';
 
 export function useAuthAction() {
