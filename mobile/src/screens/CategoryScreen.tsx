@@ -6,7 +6,9 @@ export function CategoryScreen({ navigation, route }: ScreenProps<'Category'>) {
 
   return (
     <WashiBoard
+      key={category}
       category={category}
+      onOpenNote={(noteId) => navigation.navigate('NoteEditor', { mode: 'edit', noteId })}
       onNewNote={() => navigation.navigate('NoteEditor', { mode: 'create', category })}
     />
   );

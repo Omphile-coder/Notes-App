@@ -2,7 +2,8 @@ import { argon2idAsync } from '@noble/hashes/argon2.js';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils.js';
 import { Buffer } from 'buffer';
 import { getRandomBytesAsync, randomUUID } from 'expo-crypto';
-import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
+
+import { getDatabase } from '../storage/database';
 
 export type Account = {
   id: string;
@@ -31,35 +32,6 @@ export type ProfileUpdate = {
 };
 
 export class AuthError extends Error {}
-
-let databasePromise: Promise<SQLiteDatabase> | undefined;
-
-async function openAccountsDatabase() {
-  const database = await openDatabaseAsync('washi-accounts.db');
-  try {
-    await database.execAsync(`
-      CREATE TABLE IF NOT EXISTS accounts (
-        id TEXT PRIMARY KEY NOT NULL,
-        username TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        passwordSalt TEXT NOT NULL,
-        passwordHash TEXT NOT NULL
-      );
-    `);
-    return database;
-  } catch (error) {
-    await database.closeAsync();
-    throw error;
-  }
-}
-
-function accountsDatabase() {
-  databasePromise ??= openAccountsDatabase().catch((error: unknown) => {
-    databasePromise = undefined;
-    throw error;
-  });
-  return databasePromise;
-}
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
@@ -109,7 +81,7 @@ async function passwordMatches(password: string, credentials: Credentials) {
 }
 
 export async function getAccount(id: string) {
-  const database = await accountsDatabase();
+  const database = await getDatabase();
   return database.getFirstAsync<Account>(
     'SELECT id, username, email FROM accounts WHERE id = ?',
     id,
@@ -119,7 +91,7 @@ export async function getAccount(id: string) {
 export async function createAccount(input: Registration) {
   const { username, email } = validateProfile(input.username, input.email);
   validateNewPassword(input.password);
-  const database = await accountsDatabase();
+  const database = await getDatabase();
   const credentials = await createCredentials(input.password);
 
   const result = await database.runAsync(
@@ -133,7 +105,7 @@ export async function createAccount(input: Registration) {
 }
 
 export async function authenticate(email: string, password: string): Promise<Account> {
-  const database = await accountsDatabase();
+  const database = await getDatabase();
   const account = await database.getFirstAsync<StoredAccount>(
     'SELECT * FROM accounts WHERE email = ?',
     normalizeEmail(email),
@@ -150,7 +122,7 @@ export async function updateAccount(id: string, input: ProfileUpdate): Promise<A
   const { username, email } = validateProfile(input.username, input.email);
   if (input.newPassword) validateNewPassword(input.newPassword);
 
-  const database = await accountsDatabase();
+  const database = await getDatabase();
   const account = await database.getFirstAsync<StoredAccount>(
     'SELECT * FROM accounts WHERE id = ?',
     id,

@@ -4,6 +4,7 @@ import { InstrumentSerif_400Regular } from '@expo-google-fonts/instrument-serif/
 import { useFonts } from 'expo-font';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,9 +16,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { noteCategories, type NoteCategory } from '../notes/categories';
+import { matchesNoteSearch, type Note } from '../notes/notes';
+import { useSavedNotes } from '../notes/useSavedNotes';
 import { NoteCard } from './NoteCard';
 import { PaperGrid } from './PaperGrid';
-import { matchesBoardSearch, sampleNotes, type BoardNote } from './sampleNotes';
 import { Tape } from './Tape';
 import { noteColours, paper } from './theme';
 
@@ -29,6 +31,7 @@ type HeaderActions = {
 
 type Props = {
   onNewNote: () => void;
+  onOpenNote: (id: string) => void;
 } & ({ header: HeaderActions; category?: never } | { category: NoteCategory; header?: never });
 
 const layouts: Layout[] = ['Board', 'List'];
@@ -38,19 +41,17 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-export function WashiBoard({ category, header, onNewNote }: Props) {
+export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
   const [fontLoaded] = useFonts({ Caveat_400Regular, InstrumentSerif_400Regular });
   const [layout, setLayout] = useState<Layout>('Board');
-  const [pinnedOnly, setPinnedOnly] = useState(false);
   const [query, setQuery] = useState('');
   const { width, fontScale } = useWindowDimensions();
   const inColumns = layout === 'Board' && width >= 350 && fontScale <= 1.3;
 
-  const filtered = sampleNotes.filter(
-    (note) => (!category || note.category === category) && matchesBoardSearch(note, query),
-  );
-  const pinned = filtered.filter((note) => note.pinned);
-  const others = pinnedOnly ? [] : filtered.filter((note) => !note.pinned);
+  const { state, retry } = useSavedNotes(category);
+  const filtered = state.status === 'ready'
+    ? state.notes.filter((note) => matchesNoteSearch(note, query))
+    : [];
 
   return (
     <SafeAreaView style={styles.page} edges={header ? ['top', 'left', 'right', 'bottom'] : ['left', 'right', 'bottom']}>
@@ -129,26 +130,40 @@ export function WashiBoard({ category, header, onNewNote }: Props) {
             ) : null}
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.filters}
-          >
-            <Filter label="All" selected={!pinnedOnly} onPress={() => setPinnedOnly(false)} />
-            <Filter label="Pinned" selected={pinnedOnly} onPress={() => setPinnedOnly(true)} />
-            {header && noteCategories.map((name) => (
-              <Filter key={name} label={name} onPress={() => header.onCategory(name)} />
-            ))}
-          </ScrollView>
+          {header ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.filters}
+            >
+              <View style={[styles.filter, styles.activeFilter]}>
+                <Text accessibilityLabel="All categories" style={styles.activeFilterLabel}>All</Text>
+              </View>
+              {noteCategories.map((name) => (
+                <Filter key={name} label={name} onPress={() => header.onCategory(name)} />
+              ))}
+            </ScrollView>
+          ) : null}
 
-          <View style={styles.sections}>
-            <NoteSection title="Pinned" notes={pinned} inColumns={inColumns} handwritten={fontLoaded} />
-            <NoteSection title="Others" notes={others} inColumns={inColumns} handwritten={fontLoaded} />
-            {!pinned.length && !others.length ? (
-              <Text style={styles.empty}>{query.trim() ? 'No matching notes.' : 'No notes here yet.'}</Text>
-            ) : null}
-          </View>
+          {state.status === 'loading' ? (
+            <ActivityIndicator accessibilityLabel="Loading notes" color={paper.muted} />
+          ) : null}
+          {state.status === 'error' ? (
+            <View style={styles.section}>
+              <Text accessibilityRole="alert" style={styles.empty}>Could not load your notes.</Text>
+              <Filter label="Try again" onPress={retry} />
+            </View>
+          ) : null}
+          {state.status === 'ready' && filtered.length === 0 ? (
+            <Text style={styles.empty}>{query.trim() ? 'No matching notes.' : 'No notes here yet.'}</Text>
+          ) : null}
+          <NoteSection
+            notes={filtered}
+            inColumns={inColumns}
+            handwritten={fontLoaded}
+            onOpenNote={onOpenNote}
+          />
         </ScrollView>
 
         <Pressable
@@ -164,29 +179,28 @@ export function WashiBoard({ category, header, onNewNote }: Props) {
   );
 }
 
-function Filter({ label, selected, onPress }: { label: string; selected?: boolean; onPress: () => void }) {
+function Filter({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={selected === undefined ? undefined : { selected }}
       onPress={onPress}
-      style={[styles.filter, selected && styles.activeFilter]}
+      style={styles.filter}
     >
-      <Text style={[styles.filterLabel, selected && styles.activeFilterLabel]}>{label}</Text>
+      <Text style={styles.filterLabel}>{label}</Text>
     </Pressable>
   );
 }
 
 function NoteSection({
-  title,
   notes,
   inColumns,
   handwritten,
+  onOpenNote,
 }: {
-  title: string;
-  notes: readonly BoardNote[];
+  notes: readonly Note[];
   inColumns: boolean;
   handwritten: boolean;
+  onOpenNote: (id: string) => void;
 }) {
   if (!notes.length) return null;
 
@@ -198,11 +212,16 @@ function NoteSection({
 
   return (
     <View style={styles.section}>
-      <Text accessibilityRole="header" style={styles.sectionTitle}>{title}</Text>
       {rows.map((row) => (
         <View key={row[0].id} style={styles.row}>
           {row.map((note) => (
-            <NoteCard key={note.id} note={note} compact={inColumns} handwritten={handwritten} />
+            <NoteCard
+              key={note.id}
+              note={note}
+              compact={inColumns}
+              handwritten={handwritten}
+              onPress={() => onOpenNote(note.id)}
+            />
           ))}
           {inColumns && row.length === 1 ? <View style={styles.emptyColumn} /> : null}
         </View>
@@ -264,10 +283,8 @@ const styles = StyleSheet.create({
   },
   activeFilter: { backgroundColor: paper.ink, borderColor: paper.ink },
   filterLabel: { color: paper.muted, fontSize: 13, fontWeight: '700' },
-  activeFilterLabel: { color: paper.white },
-  sections: { gap: 34, marginTop: 14 },
+  activeFilterLabel: { color: paper.white, fontSize: 13, fontWeight: '700' },
   section: { gap: 16 },
-  sectionTitle: { color: paper.muted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2, textTransform: 'uppercase' },
   row: { flexDirection: 'row', alignItems: 'stretch', gap: 14, paddingTop: 8 },
   emptyColumn: { flex: 1 },
   empty: { color: paper.muted, fontSize: 15, marginTop: 18 },
