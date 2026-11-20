@@ -1,6 +1,5 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Caveat_400Regular } from '@expo-google-fonts/caveat/400Regular';
-import { InstrumentSerif_400Regular } from '@expo-google-fonts/instrument-serif/400Regular';
 import { useFonts } from 'expo-font';
 import { useState } from 'react';
 import {
@@ -46,7 +45,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
 });
 
 export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
-  const [fontLoaded] = useFonts({ Caveat_400Regular, InstrumentSerif_400Regular });
+  const [fontLoaded] = useFonts({ Caveat_400Regular });
   const [layout, setLayout] = useState<Layout>('Board');
   const [query, setQuery] = useState('');
   const [order, setOrder] = useState<NoteSortOrder>('newest');
