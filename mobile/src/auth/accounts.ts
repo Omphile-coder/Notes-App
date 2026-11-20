@@ -58,6 +58,7 @@ function validateNewPassword(password: string) {
 function derivePassword(password: string, salt: Uint8Array) {
   const bytes = Buffer.from(password, 'utf8');
   return argon2idAsync(bytes, salt, { m: 19_456, t: 2, p: 1, dkLen: 32 });
+  
 }
 
 async function createCredentials(password: string): Promise<Credentials> {
