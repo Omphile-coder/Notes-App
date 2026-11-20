@@ -4,9 +4,9 @@ Washi Notes is an Android and iOS notes app for organizing work, study, and pers
 
 Built by Omphile Lucas for CodeTribe's React Native Task 2.
 
-## Features
+## Preview
 
-<img src="./mobile/assets/notes-iphone.jpg"/>
+<img src="./mobile/assets/notes-iphone.jpeg"/>
 
 ## Features
 
