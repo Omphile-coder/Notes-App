@@ -52,10 +52,12 @@ export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
   const { width, fontScale } = useWindowDimensions();
   const inColumns = layout === 'Board' && width >= 350 && fontScale <= 1.3;
 
-  const { state, retry } = useSavedNotes(order, category);
+  const { state, retry, changePin, pendingPinId, pinError } = useSavedNotes(order, category);
   const filtered = state.status === 'ready'
     ? state.notes.filter((note) => matchesNoteSearch(note, query))
     : [];
+  const pinned = filtered.filter((note) => note.pinned === 1);
+  const unpinned = filtered.filter((note) => note.pinned === 0);
 
   return (
     <SafeAreaView style={styles.page} edges={header ? ['top', 'left', 'right', 'bottom'] : ['left', 'right', 'bottom']}>
@@ -171,11 +173,26 @@ export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
           {state.status === 'ready' && filtered.length === 0 ? (
             <Text style={styles.empty}>{query.trim() ? 'No matching notes.' : 'No notes here yet.'}</Text>
           ) : null}
+          {pinError ? (
+            <Text accessibilityRole="alert" style={styles.pinError}>{pinError}</Text>
+          ) : null}
           <NoteSection
-            notes={filtered}
+            title="Pinned"
+            notes={pinned}
             inColumns={inColumns}
             handwritten={fontLoaded}
             onOpenNote={onOpenNote}
+            onTogglePin={changePin}
+            pendingPinId={pendingPinId}
+          />
+          <NoteSection
+            title={pinned.length ? 'Other notes' : undefined}
+            notes={unpinned}
+            inColumns={inColumns}
+            handwritten={fontLoaded}
+            onOpenNote={onOpenNote}
+            onTogglePin={changePin}
+            pendingPinId={pendingPinId}
           />
         </ScrollView>
 
@@ -205,15 +222,21 @@ function Filter({ label, onPress }: { label: string; onPress: () => void }) {
 }
 
 function NoteSection({
+  title,
   notes,
   inColumns,
   handwritten,
   onOpenNote,
+  onTogglePin,
+  pendingPinId,
 }: {
+  title?: string;
   notes: readonly Note[];
   inColumns: boolean;
   handwritten: boolean;
   onOpenNote: (id: string) => void;
+  onTogglePin: (note: Note) => void;
+  pendingPinId: string | null;
 }) {
   if (!notes.length) return null;
 
@@ -225,6 +248,7 @@ function NoteSection({
 
   return (
     <View style={styles.section}>
+      {title ? <Text accessibilityRole="header" style={styles.sectionTitle}>{title}</Text> : null}
       {rows.map((row) => (
         <View key={row[0].id} style={styles.row}>
           {row.map((note) => (
@@ -234,6 +258,9 @@ function NoteSection({
               compact={inColumns}
               handwritten={handwritten}
               onPress={() => onOpenNote(note.id)}
+              onTogglePin={() => void onTogglePin(note)}
+              pinBusy={pendingPinId === note.id}
+              pinDisabled={pendingPinId !== null}
             />
           ))}
           {inColumns && row.length === 1 ? <View style={styles.emptyColumn} /> : null}
@@ -296,6 +323,8 @@ const styles = StyleSheet.create({
   filterLabel: { color: paper.muted, fontSize: 13, fontWeight: '700' },
   activeFilterLabel: { color: paper.white, fontSize: 13, fontWeight: '700' },
   section: { gap: 16 },
+  sectionTitle: { color: paper.muted, fontSize: 12, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase' },
+  pinError: { color: '#8c2426', fontWeight: '600' },
   row: { flexDirection: 'row', alignItems: 'stretch', gap: 14, paddingTop: 8 },
   emptyColumn: { flex: 1 },
   empty: { color: paper.muted, fontSize: 15, marginTop: 18 },

@@ -27,6 +27,10 @@ async function openDatabase() {
         updatedAt INTEGER
       );
 
+      CREATE TABLE IF NOT EXISTS note_pins (
+        noteId TEXT PRIMARY KEY NOT NULL REFERENCES notes(id) ON DELETE CASCADE
+      );
+
       CREATE INDEX IF NOT EXISTS notes_owner_created
       ON notes (ownerId, createdAt DESC);
     `);

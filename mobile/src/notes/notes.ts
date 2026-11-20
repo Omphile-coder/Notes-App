@@ -16,6 +16,7 @@ export type Note = {
   category: NoteCategory;
   createdAt: number;
   updatedAt: number | null;
+  pinned: 0 | 1;
 };
 
 export type NoteSortOrder = 'newest' | 'oldest';
@@ -43,7 +44,8 @@ export async function listNotes(
   const parameters = category ? [ownerId, category] : [ownerId];
 
   return database.getAllAsync<Note>(
-    `SELECT id, title, body, category, createdAt, updatedAt
+    `SELECT id, title, body, category, createdAt, updatedAt,
+            EXISTS (SELECT 1 FROM note_pins WHERE noteId = notes.id) AS pinned
      FROM notes WHERE ownerId = ?${categoryFilter}
      ORDER BY createdAt ${direction}, rowid ${direction}`,
     ...parameters,
@@ -53,7 +55,9 @@ export async function listNotes(
 export async function getNote(ownerId: string, id: string) {
   const database = await getDatabase();
   return database.getFirstAsync<Note>(
-    'SELECT id, title, body, category, createdAt, updatedAt FROM notes WHERE ownerId = ? AND id = ?',
+    `SELECT id, title, body, category, createdAt, updatedAt,
+            EXISTS (SELECT 1 FROM note_pins WHERE noteId = notes.id) AS pinned
+     FROM notes WHERE ownerId = ? AND id = ?`,
     ownerId,
     id,
   );
@@ -88,6 +92,26 @@ export async function updateNote(ownerId: string, id: string, draft: NoteDraft) 
     id,
   );
   if (result.changes === 0) throw new NoteError('This note is no longer available.');
+}
+
+export async function setNotePinned(ownerId: string, id: string, pinned: boolean) {
+  const database = await getDatabase();
+  if (pinned) {
+    await database.runAsync(
+      `INSERT INTO note_pins (noteId)
+       SELECT id FROM notes WHERE ownerId = ? AND id = ?
+       ON CONFLICT(noteId) DO NOTHING`,
+      ownerId,
+      id,
+    );
+    return;
+  }
+
+  await database.runAsync(
+    'DELETE FROM note_pins WHERE noteId IN (SELECT id FROM notes WHERE ownerId = ? AND id = ?)',
+    ownerId,
+    id,
+  );
 }
 
 export async function deleteNote(ownerId: string, id: string) {
