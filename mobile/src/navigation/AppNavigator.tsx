@@ -61,8 +61,8 @@ export function AppNavigator() {
           </>
         ) : (
           <>
-            <Stack.Screen name="SignIn" component={SignInScreen} options={{ title: 'Washi Notes' }} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
           </>
         )}
       </Stack.Navigator>

@@ -19,8 +19,8 @@ import { matchesNoteSearch, type Note, type NoteSortOrder } from '../notes/notes
 import { useSavedNotes } from '../notes/useSavedNotes';
 import { NoteCard } from './NoteCard';
 import { PaperGrid } from './PaperGrid';
-import { Tape } from './Tape';
-import { noteColours, paper } from './theme';
+import { paper } from './theme';
+import { WashiWordmark } from './WashiWordmark';
 
 type Layout = 'Board' | 'List';
 type HeaderActions = {
@@ -67,18 +67,7 @@ export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.top}>
-            {header ? (
-              <View style={styles.wordmark} accessible accessibilityLabel="Washi Notes">
-                <Tape
-                  background={noteColours.pink.tape}
-                  stripe={noteColours.pink.stripe}
-                  style={styles.wordmarkTape}
-                />
-                <Text style={styles.brand}>
-                  washi<Text style={styles.brandLight}> notes</Text>
-                </Text>
-              </View>
-            ) : null}
+            {header ? <WashiWordmark style={styles.wordmark} /> : null}
 
             <View accessibilityRole="tablist" style={styles.switcher}>
               {layouts.map((option) => (
@@ -109,7 +98,7 @@ export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
           </View>
 
           {header ? (
-            <Text accessibilityRole="header" style={[styles.date, fontLoaded && styles.serif]}>
+            <Text accessibilityRole="header" style={styles.date}>
               {dateFormat.format(new Date())}
             </Text>
           ) : null}
@@ -260,10 +249,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: { paddingTop: 16, paddingHorizontal: 16, paddingBottom: 88, gap: 14 },
   top: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, minHeight: 44 },
-  wordmark: { flexGrow: 1, paddingVertical: 4, paddingRight: 4 },
-  brand: { color: paper.ink, fontSize: 24, fontWeight: '900', letterSpacing: -1.1 },
-  brandLight: { color: paper.muted, fontWeight: '600' },
-  wordmarkTape: { left: -3, bottom: 6, width: 74, height: 12 },
+  wordmark: { flexGrow: 1 },
   switcher: {
     flexDirection: 'row',
     borderRadius: 24,
@@ -281,8 +267,7 @@ const styles = StyleSheet.create({
   layoutLabel: { color: paper.muted, fontSize: 14, fontWeight: '700' },
   activeLayoutLabel: { color: paper.ink },
   profile: { minWidth: 40, minHeight: 44, justifyContent: 'center', alignItems: 'center' },
-  date: { fontSize: 32, color: paper.ink, letterSpacing: -0.6 },
-  serif: { fontFamily: 'InstrumentSerif_400Regular', fontSize: 37, letterSpacing: 0 },
+  date: { fontSize: 30, fontWeight: '600', color: paper.ink, letterSpacing: -0.6 },
   search: {
     flexDirection: 'row',
     alignItems: 'center',

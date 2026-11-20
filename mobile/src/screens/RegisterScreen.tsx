@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Button } from 'react-native';
 
-import { AuthField, AuthForm, EmailField, useAuthAction } from '../auth/AuthForm';
+import { AuthField, EmailField, useAuthAction } from '../auth/AuthForm';
 import { AuthError, createAccount } from '../auth/accounts';
+import { WashiAuthButton, WashiAuthPage } from '../auth/WashiAuthPage';
 import type { ScreenProps } from '../navigation/types';
 
 export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
@@ -21,7 +21,27 @@ export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
   }
 
   return (
-    <AuthForm error={error}>
+    <WashiAuthPage
+      title="Create an account"
+      colour="pink"
+      error={error}
+      actions={(
+        <>
+          <WashiAuthButton
+            title={busy ? 'Creating account…' : 'Create account'}
+            disabled={busy}
+            busy={busy}
+            onPress={() => void run(register, 'Unable to create an account. Try again.')}
+          />
+          <WashiAuthButton
+            title="Back to sign in"
+            secondary
+            disabled={busy}
+            onPress={() => navigation.goBack()}
+          />
+        </>
+      )}
+    >
       <AuthField
         label="Username"
         value={username}
@@ -45,11 +65,6 @@ export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
         editable={!busy}
         secureTextEntry
       />
-      <Button
-        title={busy ? 'Creating account…' : 'Create account'}
-        disabled={busy}
-        onPress={() => void run(register, 'Unable to create an account. Try again.')}
-      />
-    </AuthForm>
+    </WashiAuthPage>
   );
 }
