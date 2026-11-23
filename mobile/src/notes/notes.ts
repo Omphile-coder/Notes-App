@@ -21,8 +21,10 @@ export type Note = {
 
 export type NoteSortOrder = "newest" | "oldest";
 
+// Represents validation or unavailable-note failures for the UI.
 export class NoteError extends Error {}
 
+// Validates a note draft and returns normalized save values.
 function validateNote(draft: NoteDraft) {
   const body = draft.body.trim();
   if (!body) throw new NoteError("Write your note before saving.");
@@ -33,6 +35,7 @@ function validateNote(draft: NoteDraft) {
   return { title: draft.title.trim(), body, category: draft.category };
 }
 
+// Lists an owner's notes with optional category and date sorting.
 export async function listNotes(
   ownerId: string,
   category?: NoteCategory,
@@ -52,6 +55,7 @@ export async function listNotes(
   );
 }
 
+// Retrieves one owned note and its pinned state.
 export async function getNote(ownerId: string, id: string) {
   const database = await getDatabase();
   return database.getFirstAsync<Note>(
@@ -63,6 +67,7 @@ export async function getNote(ownerId: string, id: string) {
   );
 }
 
+// Validates and inserts a new note for an account owner.
 export async function createNote(ownerId: string, draft: NoteDraft) {
   const { title, body, category } = validateNote(draft);
   const database = await getDatabase();
@@ -79,6 +84,7 @@ export async function createNote(ownerId: string, draft: NoteDraft) {
   return id;
 }
 
+// Validates and updates an existing owned note.
 export async function updateNote(
   ownerId: string,
   id: string,
@@ -99,6 +105,7 @@ export async function updateNote(
     throw new NoteError("This note is no longer available.");
 }
 
+// Adds or removes a note from the owner's pin collection.
 export async function setNotePinned(
   ownerId: string,
   id: string,
@@ -123,6 +130,7 @@ export async function setNotePinned(
   );
 }
 
+// Deletes an owned note and rejects missing notes.
 export async function deleteNote(ownerId: string, id: string) {
   const database = await getDatabase();
   const result = await database.runAsync(
@@ -134,6 +142,7 @@ export async function deleteNote(ownerId: string, id: string) {
     throw new NoteError("This note is no longer available.");
 }
 
+// Checks whether every search term appears in title or body.
 export function matchesNoteSearch(note: Note, query: string) {
   const text = `${note.title} ${note.body}`.toLowerCase();
   return query

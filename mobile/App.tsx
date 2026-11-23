@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from './src/auth/AuthProvider';
 import { AppNavigator } from './src/navigation/AppNavigator';
 
+// Provides authentication state and the primary app navigation.
 export default function App() {
   return (
     <AuthProvider>

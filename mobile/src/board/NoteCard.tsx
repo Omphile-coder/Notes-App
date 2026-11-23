@@ -11,6 +11,8 @@ const colourByCategory = {
   Study: "green",
 } as const;
 
+// Displays a note summary with category styling and pin controls.
+// Opens the note editor or toggles pin state through callbacks.
 export function NoteCard({
   note,
   compact,

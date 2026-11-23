@@ -18,6 +18,8 @@ type Auth = {
 
 const AuthContext = createContext<Auth | null>(null);
 
+// Shares session state and account actions with the app.
+// Restores the saved session and exposes sign-in and profile operations.
 export function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<SessionState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -25,6 +27,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     let active = true;
 
+    // Restores the account associated with the saved session.
     async function restoreSession() {
       try {
         const id = await readSession();
@@ -42,22 +45,26 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
   }, [attempt]);
 
+  // Restarts session restoration after an initialization error.
   function retry() {
     setSession({ status: 'loading' });
     setAttempt((value) => value + 1);
   }
 
+  // Authenticates an account and stores it as the active session.
   async function signIn(email: string, password: string) {
     const user = await authenticate(email, password);
     await writeSession(user.id);
     setSession({ status: 'ready', user });
   }
 
+  // Clears the active session and signed-in account state.
   async function signOut() {
     await clearSession();
     setSession({ status: 'ready', user: null });
   }
 
+  // Updates the signed-in account profile and refreshes auth state.
   async function saveProfile(input: ProfileUpdate) {
     if (session.status !== 'ready' || !session.user) {
       throw new Error('A signed-in account is required to edit a profile.');
@@ -76,6 +83,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   );
 }
 
+// Reads the nearest authentication context and guards misuse.
 export function useAuth() {
   const auth = useContext(AuthContext);
   if (!auth) throw new Error('useAuth must be used inside AuthProvider.');

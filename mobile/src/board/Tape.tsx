@@ -8,6 +8,8 @@ type Props = {
 
 const stripes = [-7, 7, 21, 35, 49, 63, 77, 91];
 
+// Renders a decorative washi-tape strip with diagonal stripes.
+// Supports custom colors and an optional container position style.
 export function Tape({ background, stripe, style }: Props) {
   return (
     <View

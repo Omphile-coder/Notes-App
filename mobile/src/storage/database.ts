@@ -2,6 +2,7 @@ import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 
 let databasePromise: Promise<SQLiteDatabase> | undefined;
 
+// Opens SQLite and creates tables, indexes, and foreign-key behavior.
 async function openDatabase() {
   const database = await openDatabaseAsync('washi-accounts.db');
 
@@ -41,6 +42,8 @@ async function openDatabase() {
   }
 }
 
+// Returns one shared database connection promise for the app.
+// Resets the cached promise when opening or initialization fails.
 export function getDatabase() {
   databasePromise ??= openDatabase().catch((error: unknown) => {
     databasePromise = undefined;

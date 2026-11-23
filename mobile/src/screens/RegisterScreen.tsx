@@ -5,6 +5,7 @@ import { AuthError, createAccount } from '../auth/accounts';
 import { WashiAuthButton, WashiAuthPage } from '../auth/WashiAuthPage';
 import type { ScreenProps } from '../navigation/types';
 
+// Collects registration details and creates a local account.
 export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
   const { busy, error, run } = useAuthAction();
   const [username, setUsername] = useState('');
@@ -12,6 +13,7 @@ export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
 
+  // Checks password confirmation, creates the account, and returns to sign-in.
   async function register() {
     if (password !== confirmation) throw new AuthError('The passwords do not match.');
     await createAccount({ username, email, password });

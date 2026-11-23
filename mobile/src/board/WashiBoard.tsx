@@ -51,6 +51,8 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
+// Displays, searches, sorts, and lays out the user's notes.
+// Supports both the main board and a category-filtered board.
 export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
   const [fontLoaded] = useFonts({ Caveat_400Regular });
   const [layout, setLayout] = useState<Layout>("Board");
@@ -280,6 +282,7 @@ export function WashiBoard({ category, header, onNewNote, onOpenNote }: Props) {
   );
 }
 
+// Renders a reusable compact filter or retry button.
 function Filter({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable
@@ -292,6 +295,7 @@ function Filter({ label, onPress }: { label: string; onPress: () => void }) {
   );
 }
 
+// Groups notes into pinned or ordinary sections and board rows.
 function NoteSection({
   title,
   notes,

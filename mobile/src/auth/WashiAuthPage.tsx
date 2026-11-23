@@ -26,6 +26,8 @@ type Props = {
   actions: ReactNode;
 };
 
+// Displays the shared decorative layout for authentication screens.
+// Handles notices, errors, custom fields, and page actions.
 export function WashiAuthPage({
   title,
   colour,
@@ -92,6 +94,7 @@ export function WashiAuthPage({
   );
 }
 
+// Renders a primary or secondary authentication action button.
 export function WashiAuthButton({
   title,
   onPress,

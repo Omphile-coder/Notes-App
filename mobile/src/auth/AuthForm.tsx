@@ -11,11 +11,14 @@ import { paper } from '../board/theme';
 
 import { AuthError } from './accounts';
 
+// Tracks pending auth work and presents user-facing failures.
+// Prevents duplicate actions with a synchronous running guard.
 export function useAuthAction() {
   const running = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  // Runs one authentication action and records its error state.
   async function run(action: () => Promise<void>, fallback: string) {
     if (running.current) return;
     running.current = true;
@@ -34,6 +37,7 @@ export function useAuthAction() {
   return { busy, error, run };
 }
 
+// Renders a labeled text input with consistent app styling.
 export function AuthField({
   label,
   ...props
@@ -53,6 +57,7 @@ export function AuthField({
   );
 }
 
+// Renders an email input with mobile keyboard and autofill settings.
 export function EmailField(props: TextInputProps) {
   return (
     <AuthField

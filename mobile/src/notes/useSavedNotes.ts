@@ -10,6 +10,8 @@ type NotesState =
   | { status: 'error' }
   | { status: 'ready'; notes: Note[] };
 
+// Loads notes for the signed-in account and handles pin updates.
+// Refreshes data when navigation, filters, sort, or retry state changes.
 export function useSavedNotes(order: NoteSortOrder, category?: NoteCategory) {
   const { session } = useAuth();
   const ownerId = session.status === 'ready' ? session.user?.id : undefined;
@@ -38,6 +40,7 @@ export function useSavedNotes(order: NoteSortOrder, category?: NoteCategory) {
     };
   }, [ownerId, category, order, attempt]));
 
+  // Toggles one note pin and updates the loaded note state.
   async function changePin(note: Note) {
     if (!ownerId || pinRequest.current) return;
     const pinned = note.pinned === 0;
