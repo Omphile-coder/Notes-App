@@ -1,6 +1,14 @@
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
-import { authenticate, getAccount, updateAccount, type Account, type ProfileUpdate } from './accounts';
+import {
+  authenticate,
+  createAccount,
+  getAccount,
+  updateAccount,
+  type Account,
+  type ProfileUpdate,
+  type Registration,
+} from './accounts';
 import { clearSession, readSession, writeSession } from './session';
 
 type SessionState =
@@ -12,6 +20,7 @@ type Auth = {
   session: SessionState;
   retry: () => void;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (input: Registration) => Promise<void>;
   signOut: () => Promise<void>;
   saveProfile: (input: ProfileUpdate) => Promise<void>;
 };
@@ -19,7 +28,7 @@ type Auth = {
 const AuthContext = createContext<Auth | null>(null);
 
 // Shares session state and account actions with the app.
-// Restores the saved session and exposes sign-in and profile operations.
+// Restores the saved session and exposes authentication and profile operations.
 export function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<SessionState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -58,6 +67,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setSession({ status: 'ready', user });
   }
 
+  // Creates an account, stores it as the active session, and opens the signed-in stack.
+  async function signUp(input: Registration) {
+    const user = await createAccount(input);
+    await writeSession(user.id);
+    setSession({ status: 'ready', user });
+  }
+
   // Clears the active session and signed-in account state.
   async function signOut() {
     await clearSession();
@@ -77,7 +93,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, retry, signIn, signOut, saveProfile }}>
+    <AuthContext.Provider value={{ session, retry, signIn, signUp, signOut, saveProfile }}>
       {children}
     </AuthContext.Provider>
   );

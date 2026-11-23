@@ -4,7 +4,7 @@ import type { NoteCategory } from '../notes/categories';
 
 // Defines route names and parameters for the native stack navigator.
 export type RootStackParamList = {
-  SignIn: { registeredEmail: string } | undefined;
+  SignIn: undefined;
   Register: undefined;
   Board: undefined;
   Category: { category: NoteCategory };

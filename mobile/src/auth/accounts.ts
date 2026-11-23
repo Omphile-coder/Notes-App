@@ -103,13 +103,14 @@ export async function getAccount(id: string) {
 export async function createAccount(input: Registration) {
   const { username, email } = validateProfile(input.username, input.email);
   validateNewPassword(input.password);
+  const id = randomUUID();
   const database = await getDatabase();
   const credentials = await createCredentials(input.password);
 
   const result = await database.runAsync(
     `INSERT INTO accounts (id, username, email, passwordSalt, passwordHash)
      VALUES (?, ?, ?, ?, ?) ON CONFLICT(email) DO NOTHING`,
-    randomUUID(),
+    id,
     username,
     email,
     credentials.passwordSalt,
@@ -120,6 +121,7 @@ export async function createAccount(input: Registration) {
       "An account with this email already exists on this device.",
     );
   }
+  return { id, username, email };
 }
 
 // Verifies email and password credentials for sign-in.

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { AuthField, EmailField, useAuthAction } from "../auth/AuthForm";
 import { useAuth } from "../auth/AuthProvider";
@@ -6,28 +6,17 @@ import { WashiAuthButton, WashiAuthPage } from "../auth/WashiAuthPage";
 import type { ScreenProps } from "../navigation/types";
 
 // Presents sign-in fields and routes users to registration.
-export function SignInScreen({ navigation, route }: ScreenProps<"SignIn">) {
+export function SignInScreen({ navigation }: ScreenProps<"SignIn">) {
   const { signIn } = useAuth();
   const { busy, error, run } = useAuthAction();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const registeredEmail = route.params?.registeredEmail;
-
-  useEffect(() => {
-    if (registeredEmail) {
-      setEmail(registeredEmail);
-      setPassword("");
-    }
-  }, [registeredEmail]);
 
   return (
     <WashiAuthPage
       title="Sign in"
       colour="yellow"
       error={error}
-      notice={
-        registeredEmail ? "Account created. Sign in to continue." : undefined
-      }
       actions={
         <>
           <WashiAuthButton

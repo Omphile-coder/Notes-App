@@ -1,25 +1,24 @@
 import { useState } from 'react';
 
 import { AuthField, EmailField, useAuthAction } from '../auth/AuthForm';
-import { AuthError, createAccount } from '../auth/accounts';
+import { useAuth } from '../auth/AuthProvider';
+import { AuthError } from '../auth/accounts';
 import { WashiAuthButton, WashiAuthPage } from '../auth/WashiAuthPage';
 import type { ScreenProps } from '../navigation/types';
 
-// Collects registration details and creates a local account.
+// Collects registration details, creates a local account, and signs the user in.
 export function RegisterScreen({ navigation }: ScreenProps<'Register'>) {
+  const { signUp } = useAuth();
   const { busy, error, run } = useAuthAction();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
 
-  // Checks password confirmation, creates the account, and returns to sign-in.
+  // Checks password confirmation and creates an active account session.
   async function register() {
     if (password !== confirmation) throw new AuthError('The passwords do not match.');
-    await createAccount({ username, email, password });
-    if (navigation.isFocused()) {
-      navigation.popTo('SignIn', { registeredEmail: email.trim().toLowerCase() });
-    }
+    await signUp({ username, email, password });
   }
 
   return (
