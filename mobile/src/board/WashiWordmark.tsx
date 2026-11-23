@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-na
 import { Tape } from './Tape';
 import { noteColours, paper } from './theme';
 
+// Renders the branded Washi Notes wordmark with tape decoration.
 export function WashiWordmark({ style }: { style?: StyleProp<ViewStyle> }) {
   return (
     <View style={[styles.wordmark, style]} accessible accessibilityLabel="Washi Notes">

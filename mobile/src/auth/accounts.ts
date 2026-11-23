@@ -31,12 +31,15 @@ export type ProfileUpdate = {
   newPassword: string;
 };
 
+// Represents validation or authentication failures shown to users.
 export class AuthError extends Error {}
 
+// Normalizes email input before validation or database lookup.
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
+// Validates profile text and returns normalized values.
 function validateProfile(username: string, email: string) {
   const name = username.trim();
   const address = normalizeEmail(email);
@@ -49,17 +52,20 @@ function validateProfile(username: string, email: string) {
   return { username: name, email: address };
 }
 
+// Enforces the supported password length and non-empty value.
 function validateNewPassword(password: string) {
   if (password.length < 8 || password.length > 128 || !password.trim()) {
     throw new AuthError("Use a password between 8 and 128 characters.");
   }
 }
 
+// Derives a password hash with Argon2id from a salt.
 function derivePassword(password: string, salt: Uint8Array) {
   const bytes = Buffer.from(password, "utf8");
   return argon2idAsync(bytes, salt, { m: 19_456, t: 2, p: 1, dkLen: 32 });
 }
 
+// Generates a random salt and password hash for secure account storage.
 async function createCredentials(password: string): Promise<Credentials> {
   const salt = await getRandomBytesAsync(16);
   return {
@@ -68,6 +74,7 @@ async function createCredentials(password: string): Promise<Credentials> {
   };
 }
 
+// Checks a submitted password against stored credentials safely.
 async function passwordMatches(password: string, credentials: Credentials) {
   if (password.length > 128) return false;
   const computed = await derivePassword(
@@ -83,6 +90,7 @@ async function passwordMatches(password: string, credentials: Credentials) {
   return difference === 0;
 }
 
+// Retrieves public account fields for a saved account identifier.
 export async function getAccount(id: string) {
   const database = await getDatabase();
   return database.getFirstAsync<Account>(
@@ -91,6 +99,7 @@ export async function getAccount(id: string) {
   );
 }
 
+// Validates and creates a locally stored account.
 export async function createAccount(input: Registration) {
   const { username, email } = validateProfile(input.username, input.email);
   validateNewPassword(input.password);
@@ -113,6 +122,7 @@ export async function createAccount(input: Registration) {
   }
 }
 
+// Verifies email and password credentials for sign-in.
 export async function authenticate(
   email: string,
   password: string,
@@ -130,6 +140,7 @@ export async function authenticate(
   return { id: account.id, username: account.username, email: account.email };
 }
 
+// Updates account profile fields and optionally changes its password.
 export async function updateAccount(
   id: string,
   input: ProfileUpdate,

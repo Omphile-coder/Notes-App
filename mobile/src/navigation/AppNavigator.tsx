@@ -14,6 +14,8 @@ import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// Selects the authentication or signed-in navigation stack.
+// Restores session loading and error states before routing.
 export function AppNavigator() {
   const { session, retry } = useAuth();
 

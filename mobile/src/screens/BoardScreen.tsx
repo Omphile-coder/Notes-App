@@ -1,6 +1,7 @@
 import { WashiBoard } from '../board/WashiBoard';
 import type { ScreenProps } from '../navigation/types';
 
+// Connects the main board to category, profile, and editor routes.
 export function BoardScreen({ navigation }: ScreenProps<'Board'>) {
   return (
     <WashiBoard

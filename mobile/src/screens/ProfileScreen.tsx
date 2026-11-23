@@ -5,12 +5,14 @@ import { useAuth } from '../auth/AuthProvider';
 import type { Account } from '../auth/accounts';
 import { WashiAuthButton, WashiAuthPage } from '../auth/WashiAuthPage';
 
+// Guards the profile form with the currently signed-in account.
 export function ProfileScreen() {
   const { session } = useAuth();
   if (session.status !== 'ready' || !session.user) return null;
   return <ProfileForm key={session.user.id} account={session.user} />;
 }
 
+// Displays editable profile and password fields with save and sign-out actions.
 function ProfileForm({ account }: { account: Account }) {
   const { saveProfile, signOut } = useAuth();
   const { busy, error, run } = useAuthAction();
@@ -20,6 +22,7 @@ function ProfileForm({ account }: { account: Account }) {
   const [newPassword, setNewPassword] = useState('');
   const [saved, setSaved] = useState(false);
 
+  // Applies profile edits and clears password fields after success.
   async function save() {
     setSaved(false);
     await saveProfile({ username, email, currentPassword, newPassword });

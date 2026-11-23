@@ -33,12 +33,14 @@ const formatTimestamp = new Intl.DateTimeFormat(undefined, {
   timeStyle: 'short',
 });
 
+// Guards note editing behind a ready session and account owner.
 export function NoteEditorScreen({ navigation, route }: EditorProps) {
   const { session } = useAuth();
   if (session.status !== 'ready' || !session.user) return null;
   return <NoteEditor key={route.key} ownerId={session.user.id} params={route.params} navigation={navigation} />;
 }
 
+// Loads a note or creates a draft, then saves or deletes it.
 function NoteEditor({
   ownerId,
   params,
@@ -92,11 +94,13 @@ function NoteEditor({
     if (finished && !busy && navigation.isFocused()) navigation.goBack();
   }, [busy, finished, navigation]);
 
+  // Saves the current draft as an update or a new note.
   async function save() {
     if (noteId) await updateNote(ownerId, noteId, draft);
     else await createNote(ownerId, draft);
   }
 
+  // Runs a save or delete once while preventing navigation races.
   async function write(action: () => Promise<unknown>, fallback: string) {
     if (writing.current || !navigation.isFocused()) return;
     writing.current = true;
@@ -113,6 +117,7 @@ function NoteEditor({
     }
   }
 
+  // Shows a destructive confirmation before deleting the note.
   function confirmDelete() {
     if (!noteId) return;
     Alert.alert('Delete this note?', 'This permanently removes the note.', [

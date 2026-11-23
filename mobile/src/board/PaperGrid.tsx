@@ -5,6 +5,8 @@ import { paper } from './theme';
 
 const spacing = 20;
 
+// Draws a responsive square grid behind app pages.
+// Rebuilds grid lines whenever the container dimensions change.
 export function PaperGrid() {
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
 

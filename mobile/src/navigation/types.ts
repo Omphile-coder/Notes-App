@@ -2,6 +2,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import type { NoteCategory } from '../notes/categories';
 
+// Defines route names and parameters for the native stack navigator.
 export type RootStackParamList = {
   SignIn: { registeredEmail: string } | undefined;
   Register: undefined;

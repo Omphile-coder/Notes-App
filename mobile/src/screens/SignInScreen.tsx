@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { WashiAuthButton, WashiAuthPage } from "../auth/WashiAuthPage";
 import type { ScreenProps } from "../navigation/types";
 
+// Presents sign-in fields and routes users to registration.
 export function SignInScreen({ navigation, route }: ScreenProps<"SignIn">) {
   const { signIn } = useAuth();
   const { busy, error, run } = useAuthAction();
